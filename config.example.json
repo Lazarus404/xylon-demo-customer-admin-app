@@ -5,8 +5,13 @@
   "interface_base_url": "http://127.0.0.1:8093",
   "default_ttl_sec": 300,
   "max_ttl_sec": 3600,
+  "webhook_secret": "lab-webhook-secret",
+  "sqlite_path": "./data/admin-history.sqlite",
+  "fleet_poll_sec": 5,
+  "scale_out_participants": 100,
   "cors_origins": [
     "http://127.0.0.1:8080",
-    "http://127.0.0.1:5173"
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174"
   ]
 }

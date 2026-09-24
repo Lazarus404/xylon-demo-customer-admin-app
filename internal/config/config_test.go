@@ -31,6 +31,15 @@ func TestLoadOK(t *testing.T) {
 	if cfg.InterfaceBaseURL != "http://127.0.0.1:8093" {
 		t.Fatalf("interface: %q", cfg.InterfaceBaseURL)
 	}
+	if cfg.SQLitePath != "./data/admin-history.sqlite" {
+		t.Fatalf("sqlite: %q", cfg.SQLitePath)
+	}
+	if cfg.FleetPollSec != 5 {
+		t.Fatalf("fleet_poll: %d", cfg.FleetPollSec)
+	}
+	if cfg.ScaleOutParticipants != 100 {
+		t.Fatalf("scale_out: %d", cfg.ScaleOutParticipants)
+	}
 }
 
 func TestLoadRejectsEmptySecret(t *testing.T) {

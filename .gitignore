@@ -1,3 +1,5 @@
 # Ignore build artifacts
 /bin/
 /*.exe
+/data/
+/web/node_modules/

@@ -17,6 +17,10 @@ type Config struct {
 	DefaultTTLSec    int      `json:"default_ttl_sec"`
 	MaxTTLSec        int      `json:"max_ttl_sec"`
 	CORSOrigins      []string `json:"cors_origins"`
+	WebhookSecret    string   `json:"webhook_secret"`
+	SQLitePath           string   `json:"sqlite_path"`
+	FleetPollSec         int      `json:"fleet_poll_sec"`
+	ScaleOutParticipants int      `json:"scale_out_participants"`
 }
 
 // Load reads JSON config; customer_id and hmac_secret are required.
@@ -33,9 +37,13 @@ func Load(path string) (Config, error) {
 		InterfaceBaseURL: "http://127.0.0.1:8093",
 		DefaultTTLSec:    300,
 		MaxTTLSec:        3600,
+		SQLitePath:           "./data/admin-history.sqlite",
+		FleetPollSec:         5,
+		ScaleOutParticipants: 100,
 		CORSOrigins: []string{
 			"http://127.0.0.1:8080",
 			"http://127.0.0.1:5173",
+			"http://127.0.0.1:5174",
 		},
 	}
 	if err := json.Unmarshal(data, &cfg); err != nil {
@@ -52,6 +60,15 @@ func Load(path string) (Config, error) {
 	}
 	if cfg.MaxTTLSec < 1 {
 		cfg.MaxTTLSec = 3600
+	}
+	if cfg.SQLitePath == "" {
+		cfg.SQLitePath = "./data/admin-history.sqlite"
+	}
+	if cfg.FleetPollSec < 1 {
+		cfg.FleetPollSec = 5
+	}
+	if cfg.ScaleOutParticipants < 1 {
+		cfg.ScaleOutParticipants = 100
 	}
 	if cfg.CustomerID == "" {
 		return Config{}, fmt.Errorf("customer_id required")

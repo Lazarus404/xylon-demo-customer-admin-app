@@ -57,6 +57,76 @@ func (c *Client) Moderate(sessionID string, body []byte) (Result, error) {
 	return c.do(http.MethodPost, sessionID, "moderate", nil, body)
 }
 
+// RecordStart POSTs record/start body.
+func (c *Client) RecordStart(sessionID string, body []byte) (Result, error) {
+	return c.do(http.MethodPost, sessionID, "record/start", nil, body)
+}
+
+// RecordStop POSTs record/stop body.
+func (c *Client) RecordStop(sessionID string, body []byte) (Result, error) {
+	return c.do(http.MethodPost, sessionID, "record/stop", nil, body)
+}
+
+// RecordGet GETs record status.
+func (c *Client) RecordGet(sessionID string) (Result, error) {
+	return c.do(http.MethodGet, sessionID, "record", nil, nil)
+}
+
+// SessionsList GETs the tenant live session list via the platform interface.
+func (c *Client) SessionsList() (Result, error) {
+	return c.doCustomer(http.MethodGet, "sessions", nil)
+}
+
+// FleetSummary GETs fleet summary via the platform interface.
+func (c *Client) FleetSummary() (Result, error) {
+	return c.doCustomer(http.MethodGet, "fleet/summary", nil)
+}
+
+// FleetNodes GETs fleet nodes via the platform interface.
+func (c *Client) FleetNodes() (Result, error) {
+	return c.doCustomer(http.MethodGet, "fleet/nodes", nil)
+}
+
+// FleetAccepting POSTs drain/undrain body via the platform interface.
+func (c *Client) FleetAccepting(body []byte) (Result, error) {
+	return c.doCustomer(http.MethodPost, "fleet/accepting", body)
+}
+
+func (c *Client) doCustomer(method, suffix string, body []byte) (Result, error) {
+	if c.BaseURL == "" {
+		return Result{}, fmt.Errorf("interface_base_url empty")
+	}
+	if c.CustomerID == "" {
+		return Result{}, fmt.Errorf("customer_id empty")
+	}
+	u := c.BaseURL + fmt.Sprintf("/v1/customers/%s/%s", url.PathEscape(c.CustomerID), suffix)
+	var bodyReader io.Reader
+	if body != nil {
+		bodyReader = bytes.NewReader(body)
+	}
+	req, err := http.NewRequest(method, u, bodyReader)
+	if err != nil {
+		return Result{}, err
+	}
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	res, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return Result{}, err
+	}
+	defer res.Body.Close()
+	raw, err := io.ReadAll(res.Body)
+	if err != nil {
+		return Result{}, err
+	}
+	return Result{
+		StatusCode:  res.StatusCode,
+		ContentType: res.Header.Get("Content-Type"),
+		Body:        raw,
+	}, nil
+}
+
 func (c *Client) do(method, sessionID, action string, query url.Values, body []byte) (Result, error) {
 	if c.BaseURL == "" {
 		return Result{}, fmt.Errorf("interface_base_url empty")
